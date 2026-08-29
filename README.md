@@ -40,6 +40,9 @@ Pareamento webOS:
 npm run tv:pair
 ```
 
+Deixe a TV ligada e na mesma rede do PC durante o pareamento. O comando tenta
+conectar tanto em `wss://TV:3001` quanto em `ws://TV:3000`.
+
 Depois de aceitar a permissao na TV, copie a `clientKey` exibida para o
 `config.json`.
 

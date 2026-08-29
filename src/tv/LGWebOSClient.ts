@@ -4,6 +4,7 @@ import { Logger } from '../system/Logger';
 export interface LGWebOSClientOptions {
   host: string;
   clientKey: string | null;
+  forcePairing?: boolean;
   requestTimeoutMs?: number;
 }
 
@@ -103,16 +104,59 @@ export class LGWebOSClient {
       return;
     }
 
+    const endpoints = [
+      `wss://${this.options.host}:3001`,
+      `ws://${this.options.host}:3000`
+    ];
+
+    const errors: string[] = [];
+
+    for (const endpoint of endpoints) {
+      try {
+        await this.connectToEndpoint(endpoint);
+        return;
+      } catch (error: unknown) {
+        const message = formatError(error);
+        errors.push(`${endpoint}: ${message}`);
+        this.logger.warn(`Nao foi possivel conectar em ${endpoint}.`, message);
+      }
+    }
+
+    throw new Error(`Falha ao conectar no webOS. Tentativas: ${errors.join(' | ')}`);
+  }
+
+  private async connectToEndpoint(endpoint: string): Promise<void> {
     await new Promise<void>((resolve, reject) => {
-      const socket = new WebSocket(`ws://${this.options.host}:3000`);
-      this.socket = socket;
+      const socket = new WebSocket(endpoint, {
+        rejectUnauthorized: false
+      });
+      let settled = false;
+
+      const fail = (error: Error): void => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timeout);
+        socket.removeAllListeners();
+        socket.close();
+        reject(error);
+      };
+
+      const timeout = setTimeout(() => {
+        fail(new Error(`Timeout conectando em ${endpoint}.`));
+      }, this.requestTimeoutMs);
 
       socket.once('open', () => {
-        this.logger.info(`Conectado ao webOS em ${this.options.host}.`);
+        settled = true;
+        clearTimeout(timeout);
+        this.socket = socket;
+        this.logger.info(`Conectado ao webOS em ${endpoint}.`);
         resolve();
       });
 
-      socket.once('error', reject);
+      socket.once('error', fail);
 
       socket.on('message', (data) => {
         this.handleMessage(data.toString());
@@ -141,10 +185,12 @@ export class LGWebOSClient {
     await this.connect();
 
     const payload: Record<string, unknown> = {
+      forcePairing: this.options.forcePairing === true,
+      pairingType: 'PROMPT',
       manifest: defaultManifest
     };
 
-    if (this.options.clientKey) {
+    if (this.options.clientKey && !this.options.forcePairing) {
       payload['client-key'] = this.options.clientKey;
     }
 
@@ -230,12 +276,13 @@ export class LGWebOSClient {
       return;
     }
 
-    if (message.type === 'error' || message.error) {
-      this.rejectRequest(message);
+    if (!message.id) {
+      this.logger.debug('Mensagem webOS recebida.', message);
       return;
     }
 
-    if (!message.id) {
+    if (message.type === 'error' || message.error) {
+      this.rejectRequest(message);
       return;
     }
 
@@ -268,4 +315,12 @@ export class LGWebOSClient {
       this.pendingRequests.delete(id);
     }
   }
+}
+
+function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }

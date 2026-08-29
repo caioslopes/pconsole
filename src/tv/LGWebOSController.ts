@@ -54,7 +54,7 @@ export class LGWebOSController implements TVController {
   }
 
   async pair(): Promise<string | null> {
-    const client = this.createClient({ allowMissingClientKey: true });
+    const client = this.createClient({ allowMissingClientKey: true, forcePairing: true });
     try {
       return await client.register();
     } finally {
@@ -83,7 +83,7 @@ export class LGWebOSController implements TVController {
     }
   }
 
-  private createClient(options?: { allowMissingClientKey?: boolean }): LGWebOSClient {
+  private createClient(options?: { allowMissingClientKey?: boolean; forcePairing?: boolean }): LGWebOSClient {
     const host = this.getHost();
 
     if (!options?.allowMissingClientKey) {
@@ -93,7 +93,8 @@ export class LGWebOSController implements TVController {
     return new LGWebOSClient(
       {
         host,
-        clientKey: this.config.clientKey
+        clientKey: this.config.clientKey,
+        forcePairing: options?.forcePairing
       },
       this.logger
     );
