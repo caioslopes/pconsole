@@ -34,6 +34,12 @@ Teste manual para ligar a TV:
 npm run tv:wake
 ```
 
+Diagnosticar IP e portas webOS:
+
+```bash
+npm run tv:diagnose
+```
+
 Pareamento webOS:
 
 ```bash

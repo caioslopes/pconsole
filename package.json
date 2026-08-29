@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "tsx src/main.ts",
     "tv:activate": "tsx src/commands/activateTv.ts",
+    "tv:diagnose": "tsx src/commands/diagnoseTv.ts",
     "tv:inputs": "tsx src/commands/listTvInputs.ts",
     "tv:pair": "tsx src/commands/pairTv.ts",
     "tv:wake": "tsx src/commands/wakeTv.ts",

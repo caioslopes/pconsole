@@ -122,7 +122,9 @@ export class LGWebOSClient {
       }
     }
 
-    throw new Error(`Falha ao conectar no webOS. Tentativas: ${errors.join(' | ')}`);
+    throw new Error(
+      `Falha ao conectar no webOS. Rode npm run tv:diagnose para checar IP e portas. Tentativas: ${errors.join(' | ')}`
+    );
   }
 
   private async connectToEndpoint(endpoint: string): Promise<void> {
