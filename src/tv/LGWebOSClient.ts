@@ -139,8 +139,14 @@ export class LGWebOSClient {
 
         settled = true;
         clearTimeout(timeout);
-        socket.removeAllListeners();
-        socket.close();
+        socket.removeListener('open', handleOpen);
+        socket.removeListener('error', fail);
+        socket.removeListener('message', handleMessage);
+        socket.removeListener('close', handleClose);
+        socket.on('error', () => {
+          // The ws package may emit a late error after terminate().
+        });
+        socket.terminate();
         reject(error);
       };
 
@@ -148,24 +154,27 @@ export class LGWebOSClient {
         fail(new Error(`Timeout conectando em ${endpoint}.`));
       }, this.requestTimeoutMs);
 
-      socket.once('open', () => {
+      const handleOpen = (): void => {
         settled = true;
         clearTimeout(timeout);
         this.socket = socket;
         this.logger.info(`Conectado ao webOS em ${endpoint}.`);
         resolve();
-      });
+      };
 
-      socket.once('error', fail);
-
-      socket.on('message', (data) => {
+      const handleMessage = (data: WebSocket.RawData): void => {
         this.handleMessage(data.toString());
-      });
+      };
 
-      socket.on('close', () => {
+      const handleClose = (): void => {
         this.rejectPendingRequests(new Error('Conexao webOS fechada.'));
         this.socket = null;
-      });
+      };
+
+      socket.once('open', handleOpen);
+      socket.once('error', fail);
+      socket.on('message', handleMessage);
+      socket.on('close', handleClose);
     });
   }
 
