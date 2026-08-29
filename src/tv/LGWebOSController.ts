@@ -1,6 +1,7 @@
 import { TVConfig } from '../config/config';
 import { WakeOnLanService } from '../network/WakeOnLanService';
 import { Logger } from '../system/Logger';
+import { LGWebOSClient, LGWebOSExternalInput } from './LGWebOSClient';
 import { TVController, TVPowerState } from './TVController';
 
 export class LGWebOSController implements TVController {
@@ -29,13 +30,22 @@ export class LGWebOSController implements TVController {
   }
 
   async turnOff(): Promise<void> {
-    this.ensureConfigured();
-    this.logger.warn('Controle LG webOS ainda nao implementado; comando turnOff ignorado.');
+    const client = this.createClient();
+    try {
+      await client.turnOff();
+    } finally {
+      await client.close();
+    }
   }
 
   async setInput(input: string): Promise<void> {
-    this.ensureConfigured();
-    this.logger.warn(`Controle LG webOS ainda nao implementado; comando setInput(${input}) ignorado.`);
+    const client = this.createClient();
+    try {
+      await client.switchInput(input);
+      this.logger.info(`Entrada da TV alterada para ${input}.`);
+    } finally {
+      await client.close();
+    }
   }
 
   async getPowerState(): Promise<TVPowerState> {
@@ -43,10 +53,58 @@ export class LGWebOSController implements TVController {
     return 'unknown';
   }
 
+  async pair(): Promise<string | null> {
+    const client = this.createClient({ allowMissingClientKey: true });
+    try {
+      return await client.register();
+    } finally {
+      await client.close();
+    }
+  }
+
+  async listExternalInputs(): Promise<LGWebOSExternalInput[]> {
+    const client = this.createClient();
+    try {
+      return await client.listExternalInputs();
+    } finally {
+      await client.close();
+    }
+  }
+
   private ensureConfigured(): void {
     if (!this.config.host) {
       throw new Error('Host/IP da TV LG nao configurado.');
     }
+  }
+
+  private ensureClientKeyConfigured(): void {
+    if (!this.config.clientKey) {
+      throw new Error('clientKey da TV LG nao configurada. Rode npm run tv:pair e aceite o pareamento na TV.');
+    }
+  }
+
+  private createClient(options?: { allowMissingClientKey?: boolean }): LGWebOSClient {
+    const host = this.getHost();
+
+    if (!options?.allowMissingClientKey) {
+      this.ensureClientKeyConfigured();
+    }
+
+    return new LGWebOSClient(
+      {
+        host,
+        clientKey: this.config.clientKey
+      },
+      this.logger
+    );
+  }
+
+  private getHost(): string {
+    if (!this.config.host) {
+      throw new Error('Host/IP da TV LG nao configurado.');
+    }
+
+    return this.config.host;
   }
 
   private getWakeOnLanMacAddress(): string {

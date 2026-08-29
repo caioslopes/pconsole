@@ -22,14 +22,37 @@ Esta primeira versao entrega a fundacao:
 - monitor de atividade do Windows via `GetLastInputInfo`;
 - controlador inicial da Steam;
 - controlador de TV simulado para desenvolvimento;
-- ligacao de TV LG pela rede via Wake-on-LAN.
+- ligacao de TV LG pela rede via Wake-on-LAN;
+- pareamento e comandos iniciais via webOS.
 
 Para ligar a TV pela rede, configure `tv.provider` como `lg-webos` e informe
-o `macAddress` da TV no `config.json`. O controle completo via webOS, incluindo
-troca real de HDMI, sera implementado depois do pareamento com a TV.
+o `macAddress` da TV no `config.json`.
 
 Teste manual para ligar a TV:
 
 ```bash
 npm run tv:wake
+```
+
+Pareamento webOS:
+
+```bash
+npm run tv:pair
+```
+
+Depois de aceitar a permissao na TV, copie a `clientKey` exibida para o
+`config.json`.
+
+Listar entradas HDMI/externas:
+
+```bash
+npm run tv:inputs
+```
+
+Use o `id` retornado pela TV no campo `tv.input`.
+
+Ativar TV e selecionar a entrada configurada:
+
+```bash
+npm run tv:activate
 ```
