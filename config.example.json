@@ -1,0 +1,21 @@
+{
+  "app": {
+    "pollingIntervalMs": 1000,
+    "activationDebounceMs": 3000,
+    "inactivityTimeoutMs": 900000
+  },
+  "steam": {
+    "executablePath": "C:\\Program Files (x86)\\Steam\\steam.exe",
+    "launchArgs": ["-gamepadui"]
+  },
+  "tv": {
+    "provider": "lg-webos",
+    "input": "HDMI_3",
+    "host": "192.168.0.100",
+    "macAddress": "AA:BB:CC:DD:EE:FF",
+    "wakeOnLanBroadcastAddress": "255.255.255.255",
+    "wakeOnLanPort": 9,
+    "powerOnDelayMs": 8000,
+    "clientKey": null
+  }
+}
