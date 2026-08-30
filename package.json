@@ -7,6 +7,7 @@
   "main": "dist/main.js",
   "scripts": {
     "console:activate": "tsx src/commands/activateConsole.ts",
+    "controller:diagnose": "tsx src/commands/diagnoseControllers.ts",
     "controller:list": "tsx src/commands/listControllers.ts",
     "dev": "tsx src/main.ts",
     "tv:activate": "tsx src/commands/activateTv.ts",

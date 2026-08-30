@@ -99,6 +99,15 @@ conferir se o DualSense foi encontrado:
 npm run controller:list
 ```
 
+Para configurar um controle wireless generico, liste todos os dispositivos HID:
+
+```bash
+npm run controller:diagnose
+```
+
+Copie o `vendorId` e o `productId` do controle para `controller.vendorId` e
+`controller.productIds` no `config.json`.
+
 Por padrao, o timeout de inatividade nao desliga a TV:
 
 ```json

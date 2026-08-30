@@ -1,5 +1,6 @@
 import { Device, devices, HID } from 'node-hid';
 import { ActivityEvent, ActivityHandler, ActivityMonitor } from './ActivityMonitor';
+import { describeHidDevice, formatHidId } from './HidDeviceFormatter';
 import { AppConfig, ControllerConfig } from '../config/config';
 import { Logger } from '../system/Logger';
 
@@ -151,10 +152,5 @@ function getDeviceKey(device: Device): string {
 }
 
 function describeDevice(device: Device): string {
-  const vendorId = `0x${device.vendorId.toString(16).padStart(4, '0')}`;
-  const productId = `0x${device.productId.toString(16).padStart(4, '0')}`;
-  const product = device.product ?? 'dispositivo HID';
-  const manufacturer = device.manufacturer ?? 'fabricante desconhecido';
-
-  return `${manufacturer} ${product} (${vendorId}:${productId})`;
+  return `${describeHidDevice(device)} (${formatHidId(device.vendorId)}:${formatHidId(device.productId)})`;
 }
