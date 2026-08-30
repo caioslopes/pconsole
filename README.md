@@ -75,8 +75,9 @@ release/pconsole.exe
 ```
 
 Depois disso, voce pode abrir o app pelo `.exe` sem manter um terminal aberto.
-Mantenha o `config.json` na raiz do projeto, ao lado da pasta `release`, ou
-use a variavel `PCONSOLE_CONFIG_PATH` apontando para o arquivo real.
+Mantenha o `config.json` na raiz do projeto, ao lado da pasta `release`, ou ao
+lado do proprio `release/pconsole.exe`. Tambem e possivel usar a variavel
+`PCONSOLE_CONFIG_PATH` apontando para o arquivo real.
 
 Instalar inicializacao automatica no login do Windows:
 
@@ -162,7 +163,8 @@ npm run dev
 A ativacao automatica observa o controle configurado, nao mouse/teclado. No
 app empacotado, confirme no menu do tray se aparece
 `Ativacao por controle: ligada`. Se aparecer `desligada`, o executavel esta
-lendo outro `config.json` ou usando a configuracao padrao.
+lendo outro `config.json` ou usando a configuracao padrao. O menu tambem mostra
+o caminho do config carregado.
 
 Para conferir se o DualSense foi encontrado:
 

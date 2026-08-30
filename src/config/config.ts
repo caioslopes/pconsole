@@ -45,6 +45,11 @@ export interface PConsoleConfig {
   tv: TVConfig;
 }
 
+export interface LoadedPConsoleConfig {
+  config: PConsoleConfig;
+  path: string | null;
+}
+
 const defaultConfig: PConsoleConfig = {
   app: {
     pollingIntervalMs: 1000,
@@ -81,6 +86,11 @@ const defaultConfig: PConsoleConfig = {
 };
 
 export async function loadConfig(logger: Logger): Promise<PConsoleConfig> {
+  const loaded = await loadConfigWithMetadata(logger);
+  return loaded.config;
+}
+
+export async function loadConfigWithMetadata(logger: Logger): Promise<LoadedPConsoleConfig> {
   const configPaths = getConfigPaths();
 
   for (const configPath of configPaths) {
@@ -88,7 +98,10 @@ export async function loadConfig(logger: Logger): Promise<PConsoleConfig> {
       const rawConfig = await fs.readFile(configPath, 'utf8');
       const userConfig = JSON.parse(rawConfig) as Partial<PConsoleConfig>;
       logger.info(`Config carregado de ${configPath}.`);
-      return mergeConfig(defaultConfig, userConfig);
+      return {
+        config: mergeConfig(defaultConfig, userConfig),
+        path: configPath
+      };
     } catch (error: unknown) {
       if (isNodeError(error) && error.code === 'ENOENT') {
         continue;
@@ -101,7 +114,10 @@ export async function loadConfig(logger: Logger): Promise<PConsoleConfig> {
   logger.warn(
     `config.json nao encontrado em: ${configPaths.join(', ')}; usando configuracao padrao de desenvolvimento.`
   );
-  return defaultConfig;
+  return {
+    config: defaultConfig,
+    path: null
+  };
 }
 
 function mergeConfig(base: PConsoleConfig, override: Partial<PConsoleConfig>): PConsoleConfig {
@@ -138,8 +154,16 @@ function defaultSteamPath(): string | null {
 }
 
 function getConfigPaths(): string[] {
+  const portableExecutableDir = process.env.PORTABLE_EXECUTABLE_DIR;
+  const portableExecutableFile = process.env.PORTABLE_EXECUTABLE_FILE;
+  const portableExecutableParent = portableExecutableFile ? path.dirname(portableExecutableFile) : undefined;
+
   const paths = [
     process.env.PCONSOLE_CONFIG_PATH,
+    portableExecutableDir ? path.join(portableExecutableDir, 'config.json') : undefined,
+    portableExecutableParent ? path.join(portableExecutableParent, 'config.json') : undefined,
+    portableExecutableDir ? path.resolve(portableExecutableDir, '..', 'config.json') : undefined,
+    portableExecutableParent ? path.resolve(portableExecutableParent, '..', 'config.json') : undefined,
     path.resolve(process.cwd(), 'config.json'),
     path.resolve(process.execPath, '..', 'config.json'),
     path.resolve(process.execPath, '..', '..', 'config.json')

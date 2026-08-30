@@ -1,18 +1,21 @@
 import { app, Menu, nativeImage, shell, Tray } from 'electron';
 import path from 'node:path';
 import { createGamingEnvironmentService } from '../application/createGamingEnvironmentService';
-import { loadConfig, PConsoleConfig } from '../config/config';
+import { loadConfigWithMetadata, PConsoleConfig } from '../config/config';
 import { ConsoleLogger } from '../system/Logger';
 
 let tray: Tray | null = null;
 let service: ReturnType<typeof createGamingEnvironmentService> | null = null;
 let loadedConfig: PConsoleConfig | null = null;
+let loadedConfigPath: string | null = null;
 let isQuitting = false;
 
 async function startTray(): Promise<void> {
   const logger = new ConsoleLogger();
-  const config = await loadConfig(logger);
+  const loaded = await loadConfigWithMetadata(logger);
+  const config = loaded.config;
   loadedConfig = config;
+  loadedConfigPath = loaded.path;
 
   service = createGamingEnvironmentService({
     app: config.app,
@@ -44,6 +47,10 @@ function updateTrayMenu(): void {
       label: `Ativacao por controle: ${loadedConfig?.app.autoActivationEnabled ? 'ligada' : 'desligada'}`,
       enabled: false
     },
+    {
+      label: `Config: ${loadedConfigPath ?? 'padrao'}`,
+      enabled: false
+    },
     { type: 'separator' },
     {
       label: 'Ativar modo console',
@@ -65,6 +72,15 @@ function updateTrayMenu(): void {
       label: 'Abrir pasta do app',
       click: () => {
         void shell.openPath(process.cwd());
+      }
+    },
+    {
+      label: 'Abrir pasta do config',
+      enabled: Boolean(loadedConfigPath),
+      click: () => {
+        if (loadedConfigPath) {
+          void shell.openPath(path.dirname(loadedConfigPath));
+        }
       }
     },
     { type: 'separator' },
