@@ -48,6 +48,26 @@ Gerar um executavel Windows portatil:
 npm run dist:win
 ```
 
+Esse build recompila o `node-hid` para o Electron, entao o Windows precisa ter
+as ferramentas nativas usadas pelo `node-gyp`:
+
+- Python 3 instalado e disponivel no terminal;
+- Visual Studio Build Tools com a carga de trabalho "Desktop development with C++".
+
+Para conferir o Python:
+
+```bash
+py --version
+python --version
+```
+
+Se o Python estiver instalado, mas o `npm run dist:win` ainda nao encontrar,
+aponte o npm para o executavel real:
+
+```bash
+npm config set python "C:\caminho\para\python.exe"
+```
+
 O executavel fica em:
 
 ```text
