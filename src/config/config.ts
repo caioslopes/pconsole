@@ -6,6 +6,8 @@ export interface AppConfig {
   pollingIntervalMs: number;
   activationDebounceMs: number;
   inactivityTimeoutMs: number;
+  autoActivationEnabled: boolean;
+  deactivateAction: 'none' | 'turn-off-tv';
 }
 
 export interface SteamConfig {
@@ -34,7 +36,9 @@ const defaultConfig: PConsoleConfig = {
   app: {
     pollingIntervalMs: 1000,
     activationDebounceMs: 3000,
-    inactivityTimeoutMs: 15 * 60 * 1000
+    inactivityTimeoutMs: 15 * 60 * 1000,
+    autoActivationEnabled: false,
+    deactivateAction: 'none'
   },
   steam: {
     executablePath: defaultSteamPath(),

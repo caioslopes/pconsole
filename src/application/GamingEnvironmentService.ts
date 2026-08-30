@@ -45,11 +45,31 @@ export class GamingEnvironmentService {
     await this.activityMonitor.stop();
   }
 
+  async activateConsoleMode(): Promise<void> {
+    if (this.stateMachine.state === 'active') {
+      this.logger.info('Modo console ja esta ativo.');
+      this.scheduleInactivityCheck();
+      return;
+    }
+
+    if (this.stateMachine.state !== 'idle') {
+      this.logger.warn(`Ignorando ativacao porque o estado atual e ${this.stateMachine.state}.`);
+      return;
+    }
+
+    await this.activate();
+  }
+
   private async handleActivity(event: ActivityEvent): Promise<void> {
     this.logger.info(`Atividade detectada: ${event.source}.`);
 
+    if (!this.config.autoActivationEnabled) {
+      this.logger.info('Ativacao automatica desabilitada; atividade ignorada.');
+      return;
+    }
+
     if (this.stateMachine.state === 'idle') {
-      await this.activate();
+      await this.activateConsoleMode();
       return;
     }
 
@@ -87,7 +107,11 @@ export class GamingEnvironmentService {
 
     try {
       this.stateMachine.transitionTo('deactivating');
-      await this.tv.turnOff();
+      if (this.config.deactivateAction === 'turn-off-tv') {
+        await this.tv.turnOff();
+      } else {
+        this.logger.info('Timeout de inatividade atingido; mantendo a TV ligada por configuracao.');
+      }
       this.stateMachine.transitionTo('idle');
     } catch (error: unknown) {
       this.logger.error('Falha ao desativar modo console.', error);

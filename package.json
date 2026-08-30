@@ -6,6 +6,7 @@
   "type": "commonjs",
   "main": "dist/main.js",
   "scripts": {
+    "console:activate": "tsx src/commands/activateConsole.ts",
     "dev": "tsx src/main.ts",
     "tv:activate": "tsx src/commands/activateTv.ts",
     "tv:diagnose": "tsx src/commands/diagnoseTv.ts",

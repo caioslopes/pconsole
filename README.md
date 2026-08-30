@@ -13,6 +13,17 @@ npm run dev
 Copie `config.example.json` para `config.json` quando quiser ajustar caminhos,
 entrada HDMI, tempos e provedor de TV.
 
+## Comandos principais
+
+Ativar a experiencia completa manualmente:
+
+```bash
+npm run console:activate
+```
+
+Esse comando liga a TV, seleciona a entrada configurada e abre a Steam em Big
+Picture.
+
 ## Estado atual
 
 Esta primeira versao entrega a fundacao:
@@ -64,4 +75,31 @@ Ativar TV e selecionar a entrada configurada:
 
 ```bash
 npm run tv:activate
+```
+
+## Automacao
+
+Por seguranca, a ativacao automatica vem desligada por padrao:
+
+```json
+"autoActivationEnabled": false
+```
+
+Quando estiver pronto para testar atividade de mouse/teclado no Windows, altere
+para `true` no `config.json` e rode:
+
+```bash
+npm run dev
+```
+
+Por padrao, o timeout de inatividade nao desliga a TV:
+
+```json
+"deactivateAction": "none"
+```
+
+Para permitir desligamento automatico da TV no futuro, use:
+
+```json
+"deactivateAction": "turn-off-tv"
 ```
