@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const projectDirectory = process.cwd();
 
   logger.info('Gerando build antes de instalar startup.');
-  await execFileAsync(getNpmExecutable(), ['run', 'build'], { cwd: projectDirectory });
+  await runBuild(projectDirectory);
 
   const manager = new WindowsStartupManager();
   const startupFilePath = await manager.install(projectDirectory);
@@ -24,6 +24,13 @@ main().catch((error: unknown) => {
   process.exit(1);
 });
 
-function getNpmExecutable(): string {
-  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
+async function runBuild(projectDirectory: string): Promise<void> {
+  if (process.platform === 'win32') {
+    await execFileAsync('cmd.exe', ['/d', '/s', '/c', 'npm.cmd run build'], {
+      cwd: projectDirectory
+    });
+    return;
+  }
+
+  await execFileAsync('npm', ['run', 'build'], { cwd: projectDirectory });
 }
