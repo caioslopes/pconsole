@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const projectDirectory = process.cwd();
 
   logger.info('Gerando build antes de instalar startup.');
-  await execFileAsync('npm', ['run', 'build'], { cwd: projectDirectory });
+  await execFileAsync(getNpmExecutable(), ['run', 'build'], { cwd: projectDirectory });
 
   const manager = new WindowsStartupManager();
   const startupFilePath = await manager.install(projectDirectory);
@@ -23,3 +23,7 @@ main().catch((error: unknown) => {
   logger.error('Falha ao instalar startup do pconsole.', error);
   process.exit(1);
 });
+
+function getNpmExecutable(): string {
+  return process.platform === 'win32' ? 'npm.cmd' : 'npm';
+}
