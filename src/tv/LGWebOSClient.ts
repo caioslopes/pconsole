@@ -5,6 +5,7 @@ export interface LGWebOSClientOptions {
   host: string;
   clientKey: string | null;
   forcePairing?: boolean;
+  endpoint?: string;
   requestTimeoutMs?: number;
 }
 
@@ -67,15 +68,6 @@ const permissions = [
 const defaultManifest = {
   manifestVersion: 1,
   appVersion: '0.1.0',
-  signed: {
-    created: '2026-08-29T00:00:00.000Z',
-    appId: 'com.pconsole.service',
-    vendorId: 'com.pconsole',
-    localizedAppNames: { '': 'pconsole' },
-    localizedVendorNames: { '': 'pconsole' },
-    permissions,
-    serial: 'pconsole'
-  },
   permissions
 };
 
@@ -104,10 +96,9 @@ export class LGWebOSClient {
       return;
     }
 
-    const endpoints = [
-      `wss://${this.options.host}:3001`,
-      `ws://${this.options.host}:3000`
-    ];
+    const endpoints = this.options.endpoint
+      ? [this.options.endpoint]
+      : [`wss://${this.options.host}:3001`, `ws://${this.options.host}:3000`];
 
     const errors: string[] = [];
 
@@ -196,7 +187,6 @@ export class LGWebOSClient {
     await this.connect();
 
     const payload: Record<string, unknown> = {
-      forcePairing: this.options.forcePairing === true,
       pairingType: 'PROMPT',
       manifest: defaultManifest
     };
@@ -213,9 +203,43 @@ export class LGWebOSClient {
       this.logger.info('Pareamento webOS concluido; clientKey recebida.');
     } else if (this.options.clientKey) {
       this.logger.info('clientKey existente aceita pela TV.');
+    } else {
+      this.logger.warn('Resposta de pareamento webOS sem clientKey.', response);
     }
 
     return clientKey;
+  }
+
+  async pair(): Promise<string | null> {
+    const endpoints = [`wss://${this.options.host}:3001`, `ws://${this.options.host}:3000`];
+    const errors: string[] = [];
+
+    for (const endpoint of endpoints) {
+      const client = new LGWebOSClient(
+        {
+          ...this.options,
+          clientKey: null,
+          endpoint,
+          forcePairing: true
+        },
+        this.logger
+      );
+
+      try {
+        const clientKey = await client.register();
+        if (clientKey) {
+          return clientKey;
+        }
+
+        errors.push(`${endpoint}: conectou, mas a TV nao retornou clientKey`);
+      } catch (error: unknown) {
+        errors.push(`${endpoint}: ${formatError(error)}`);
+      } finally {
+        await client.close();
+      }
+    }
+
+    throw new Error(`Nao foi possivel concluir o pareamento. Tentativas: ${errors.join(' | ')}`);
   }
 
   async request<TPayload = unknown>(uri: string, payload?: unknown): Promise<TPayload> {

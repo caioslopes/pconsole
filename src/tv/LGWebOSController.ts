@@ -56,7 +56,7 @@ export class LGWebOSController implements TVController {
   async pair(): Promise<string | null> {
     const client = this.createClient({ allowMissingClientKey: true, forcePairing: true });
     try {
-      return await client.register();
+      return await client.pair();
     } finally {
       await client.close();
     }
