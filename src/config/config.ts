@@ -8,6 +8,9 @@ export interface AppConfig {
   inactivityTimeoutMs: number;
   autoActivationEnabled: boolean;
   deactivateAction: 'none' | 'turn-off-tv';
+  exitWhenSteamCloses: boolean;
+  steamExitGracePeriodMs: number;
+  steamExitPollingIntervalMs: number;
 }
 
 export interface ControllerConfig {
@@ -47,7 +50,10 @@ const defaultConfig: PConsoleConfig = {
     activationDebounceMs: 3000,
     inactivityTimeoutMs: 15 * 60 * 1000,
     autoActivationEnabled: false,
-    deactivateAction: 'none'
+    deactivateAction: 'none',
+    exitWhenSteamCloses: true,
+    steamExitGracePeriodMs: 15000,
+    steamExitPollingIntervalMs: 5000
   },
   controller: {
     enabled: true,

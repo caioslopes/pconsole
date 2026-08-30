@@ -7,9 +7,11 @@
   "main": "dist/main.js",
   "scripts": {
     "console:activate": "tsx src/commands/activateConsole.ts",
+    "console:deactivate": "tsx src/commands/deactivateConsole.ts",
     "controller:diagnose": "tsx src/commands/diagnoseControllers.ts",
     "controller:list": "tsx src/commands/listControllers.ts",
     "dev": "tsx src/main.ts",
+    "steam:diagnose": "tsx src/commands/diagnoseSteam.ts",
     "tv:activate": "tsx src/commands/activateTv.ts",
     "tv:diagnose": "tsx src/commands/diagnoseTv.ts",
     "tv:inputs": "tsx src/commands/listTvInputs.ts",

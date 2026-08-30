@@ -24,6 +24,18 @@ npm run console:activate
 Esse comando liga a TV, seleciona a entrada configurada e abre a Steam em Big
 Picture.
 
+Executar as acoes de saida configuradas:
+
+```bash
+npm run console:deactivate
+```
+
+Diagnosticar processos e janelas da Steam:
+
+```bash
+npm run steam:diagnose
+```
+
 ## Estado atual
 
 Esta primeira versao entrega a fundacao:
@@ -119,3 +131,21 @@ Para permitir desligamento automatico da TV no futuro, use:
 ```json
 "deactivateAction": "turn-off-tv"
 ```
+
+Por padrao, se a Steam for fechada enquanto o modo console estiver ativo, o app
+volta para `idle`:
+
+```json
+"exitWhenSteamCloses": true
+```
+
+Depois de ativar, o app aguarda uma pequena janela antes de considerar que a
+Steam foi fechada:
+
+```json
+"steamExitGracePeriodMs": 15000
+```
+
+Para investigar uma saida especifica do Big Picture, rode `npm run
+steam:diagnose` com a Steam fechada, com a Steam normal aberta, com Big Picture
+aberto e depois de sair do Big Picture.

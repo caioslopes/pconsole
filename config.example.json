@@ -4,7 +4,10 @@
     "activationDebounceMs": 3000,
     "inactivityTimeoutMs": 900000,
     "autoActivationEnabled": false,
-    "deactivateAction": "none"
+    "deactivateAction": "none",
+    "exitWhenSteamCloses": true,
+    "steamExitGracePeriodMs": 15000,
+    "steamExitPollingIntervalMs": 5000
   },
   "controller": {
     "enabled": true,

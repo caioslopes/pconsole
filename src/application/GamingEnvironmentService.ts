@@ -23,6 +23,8 @@ export class GamingEnvironmentService {
   private readonly tv: TVController;
   private readonly tvInput: string;
   private inactivityTimer: NodeJS.Timeout | null = null;
+  private steamExitTimer: NodeJS.Timeout | null = null;
+  private activatedAt: number | null = null;
 
   constructor(dependencies: GamingEnvironmentServiceDependencies) {
     this.activityMonitor = dependencies.activityMonitor;
@@ -42,6 +44,7 @@ export class GamingEnvironmentService {
 
   async stop(): Promise<void> {
     this.clearInactivityTimer();
+    this.clearSteamExitTimer();
     await this.activityMonitor.stop();
   }
 
@@ -58,6 +61,10 @@ export class GamingEnvironmentService {
     }
 
     await this.activate();
+  }
+
+  async deactivateConsoleMode(reason = 'manual'): Promise<void> {
+    await this.deactivate(reason);
   }
 
   private async handleActivity(event: ActivityEvent): Promise<void> {
@@ -84,8 +91,10 @@ export class GamingEnvironmentService {
       await this.tv.turnOn();
       await this.tv.setInput(this.tvInput);
       await this.steam.openBigPicture();
+      this.activatedAt = Date.now();
       this.stateMachine.transitionTo('active');
       this.scheduleInactivityCheck();
+      this.scheduleSteamExitCheck();
     } catch (error: unknown) {
       this.logger.error('Falha ao ativar modo console.', error);
       this.stateMachine.transitionTo('error');
@@ -96,21 +105,53 @@ export class GamingEnvironmentService {
   private scheduleInactivityCheck(): void {
     this.clearInactivityTimer();
     this.inactivityTimer = setTimeout(() => {
-      void this.deactivate();
+      void this.deactivate('inactivity-timeout');
     }, this.config.inactivityTimeoutMs);
   }
 
-  private async deactivate(): Promise<void> {
+  private scheduleSteamExitCheck(): void {
+    this.clearSteamExitTimer();
+
+    if (!this.config.exitWhenSteamCloses) {
+      return;
+    }
+
+    this.steamExitTimer = setInterval(() => {
+      void this.checkSteamExit();
+    }, this.config.steamExitPollingIntervalMs);
+  }
+
+  private async checkSteamExit(): Promise<void> {
+    if (this.stateMachine.state !== 'active') {
+      return;
+    }
+
+    if (this.isWithinSteamExitGracePeriod()) {
+      return;
+    }
+
+    if (await this.steam.isRunning()) {
+      return;
+    }
+
+    this.logger.info('Steam fechada; saindo do modo console.');
+    await this.deactivate('steam-closed');
+  }
+
+  private async deactivate(reason: string): Promise<void> {
     if (this.stateMachine.state !== 'active') {
       return;
     }
 
     try {
+      this.clearInactivityTimer();
+      this.clearSteamExitTimer();
+      this.activatedAt = null;
       this.stateMachine.transitionTo('deactivating');
       if (this.config.deactivateAction === 'turn-off-tv') {
         await this.tv.turnOff();
       } else {
-        this.logger.info('Timeout de inatividade atingido; mantendo a TV ligada por configuracao.');
+        this.logger.info(`Saindo do modo console por ${reason}; mantendo a TV ligada por configuracao.`);
       }
       this.stateMachine.transitionTo('idle');
     } catch (error: unknown) {
@@ -127,5 +168,22 @@ export class GamingEnvironmentService {
 
     clearTimeout(this.inactivityTimer);
     this.inactivityTimer = null;
+  }
+
+  private clearSteamExitTimer(): void {
+    if (!this.steamExitTimer) {
+      return;
+    }
+
+    clearInterval(this.steamExitTimer);
+    this.steamExitTimer = null;
+  }
+
+  private isWithinSteamExitGracePeriod(): boolean {
+    if (!this.activatedAt) {
+      return false;
+    }
+
+    return Date.now() - this.activatedAt < this.config.steamExitGracePeriodMs;
   }
 }
