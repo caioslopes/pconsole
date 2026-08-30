@@ -4,7 +4,7 @@
   "description": "Console mode automation service for a Windows gaming PC.",
   "private": true,
   "type": "commonjs",
-  "main": "dist/main.js",
+  "main": "dist/tray/trayApp.js",
   "scripts": {
     "console:activate": "tsx src/commands/activateConsole.ts",
     "console:deactivate": "tsx src/commands/deactivateConsole.ts",
@@ -22,14 +22,40 @@
     "tv:pair": "tsx src/commands/pairTv.ts",
     "tv:wake": "tsx src/commands/wakeTv.ts",
     "build": "tsc -p tsconfig.json",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "dist:win:dir": "npm run build && electron-builder --win dir --x64",
     "tray": "electron dist/tray/trayApp.js",
     "start": "node dist/main.js",
     "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "build": {
+    "appId": "com.caioslopes.pconsole",
+    "productName": "pconsole",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "pconsole.png",
+        "to": "pconsole.png"
+      }
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "artifactName": "pconsole.${ext}"
+    }
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
     "@types/ws": "^8.18.1",
     "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   },

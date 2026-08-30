@@ -91,12 +91,22 @@ export class WindowsStartupManager {
 function createStartupCommand(projectDirectory: string): string {
   const logDirectory = path.join(projectDirectory, 'logs');
   const logFile = path.join(logDirectory, 'pconsole-startup.log');
+  const portableExecutable = path.join(projectDirectory, 'release', 'pconsole.exe');
+  const unpackedExecutable = path.join(projectDirectory, 'release', 'win-unpacked', 'pconsole.exe');
 
   return [
     '@echo off',
     `cd /d "${projectDirectory}"`,
     `if not exist "${logDirectory}" mkdir "${logDirectory}"`,
-    `call npm.cmd run tray >> "${logFile}" 2>&1`
+    `if exist "${portableExecutable}" (`,
+    `  start "" /b "${portableExecutable}" >> "${logFile}" 2>&1`,
+    '  exit /b 0',
+    ')',
+    `if exist "${unpackedExecutable}" (`,
+    `  start "" /b "${unpackedExecutable}" >> "${logFile}" 2>&1`,
+    '  exit /b 0',
+    ')',
+    `start "" /b cmd.exe /d /s /c ""npm.cmd" run tray >> "${logFile}" 2>&1"`
   ].join('\r\n');
 }
 

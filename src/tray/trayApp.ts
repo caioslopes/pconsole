@@ -79,7 +79,9 @@ async function shutdown(): Promise<void> {
 }
 
 function createTrayIcon(): Electron.NativeImage {
-  const iconPath = path.resolve(__dirname, '../../pconsole.png');
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'pconsole.png')
+    : path.resolve(__dirname, '../../pconsole.png');
   const icon = nativeImage.createFromPath(iconPath);
 
   if (icon.isEmpty()) {

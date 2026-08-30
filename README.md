@@ -42,6 +42,20 @@ Rodar com icone na bandeja do Windows:
 npm run dev:tray
 ```
 
+Gerar um executavel Windows portatil:
+
+```bash
+npm run dist:win
+```
+
+O executavel fica em:
+
+```text
+release/pconsole.exe
+```
+
+Depois disso, voce pode abrir o app pelo `.exe` sem manter um terminal aberto.
+
 Instalar inicializacao automatica no login do Windows:
 
 ```bash
@@ -182,7 +196,9 @@ porque precisa acessar controle HID, Steam e janelas da sessao grafica.
 
 O comando `npm run startup:install` gera o build e cria `pconsole.cmd` na pasta
 de Inicializar do usuario. Na proxima entrada no Windows, ele roda o app de
-bandeja:
+bandeja. Se existir um executavel empacotado em `release/pconsole.exe`, o
+startup usa esse executavel e nao deixa terminal aberto. Caso contrario, ele
+usa o modo de desenvolvimento:
 
 ```bash
 npm run tray
