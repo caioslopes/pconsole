@@ -81,20 +81,27 @@ const defaultConfig: PConsoleConfig = {
 };
 
 export async function loadConfig(logger: Logger): Promise<PConsoleConfig> {
-  const configPath = path.resolve(process.cwd(), 'config.json');
+  const configPaths = getConfigPaths();
 
-  try {
-    const rawConfig = await fs.readFile(configPath, 'utf8');
-    const userConfig = JSON.parse(rawConfig) as Partial<PConsoleConfig>;
-    return mergeConfig(defaultConfig, userConfig);
-  } catch (error: unknown) {
-    if (isNodeError(error) && error.code === 'ENOENT') {
-      logger.warn('config.json nao encontrado; usando configuracao padrao de desenvolvimento.');
-      return defaultConfig;
+  for (const configPath of configPaths) {
+    try {
+      const rawConfig = await fs.readFile(configPath, 'utf8');
+      const userConfig = JSON.parse(rawConfig) as Partial<PConsoleConfig>;
+      logger.info(`Config carregado de ${configPath}.`);
+      return mergeConfig(defaultConfig, userConfig);
+    } catch (error: unknown) {
+      if (isNodeError(error) && error.code === 'ENOENT') {
+        continue;
+      }
+
+      throw error;
     }
-
-    throw error;
   }
+
+  logger.warn(
+    `config.json nao encontrado em: ${configPaths.join(', ')}; usando configuracao padrao de desenvolvimento.`
+  );
+  return defaultConfig;
 }
 
 function mergeConfig(base: PConsoleConfig, override: Partial<PConsoleConfig>): PConsoleConfig {
@@ -128,6 +135,17 @@ function defaultSteamPath(): string | null {
   }
 
   return 'steam';
+}
+
+function getConfigPaths(): string[] {
+  const paths = [
+    process.env.PCONSOLE_CONFIG_PATH,
+    path.resolve(process.cwd(), 'config.json'),
+    path.resolve(process.execPath, '..', 'config.json'),
+    path.resolve(process.execPath, '..', '..', 'config.json')
+  ].filter((configPath): configPath is string => Boolean(configPath));
+
+  return Array.from(new Set(paths));
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

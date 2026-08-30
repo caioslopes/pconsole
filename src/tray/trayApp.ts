@@ -1,16 +1,18 @@
-import { app, Menu, nativeImage, Tray } from 'electron';
+import { app, Menu, nativeImage, shell, Tray } from 'electron';
 import path from 'node:path';
 import { createGamingEnvironmentService } from '../application/createGamingEnvironmentService';
-import { loadConfig } from '../config/config';
+import { loadConfig, PConsoleConfig } from '../config/config';
 import { ConsoleLogger } from '../system/Logger';
 
 let tray: Tray | null = null;
 let service: ReturnType<typeof createGamingEnvironmentService> | null = null;
+let loadedConfig: PConsoleConfig | null = null;
 let isQuitting = false;
 
 async function startTray(): Promise<void> {
   const logger = new ConsoleLogger();
   const config = await loadConfig(logger);
+  loadedConfig = config;
 
   service = createGamingEnvironmentService({
     app: config.app,
@@ -38,6 +40,10 @@ function updateTrayMenu(): void {
       label: `Status: ${service.getState()}`,
       enabled: false
     },
+    {
+      label: `Ativacao por controle: ${loadedConfig?.app.autoActivationEnabled ? 'ligada' : 'desligada'}`,
+      enabled: false
+    },
     { type: 'separator' },
     {
       label: 'Ativar modo console',
@@ -54,6 +60,12 @@ function updateTrayMenu(): void {
     {
       label: 'Atualizar status',
       click: updateTrayMenu
+    },
+    {
+      label: 'Abrir pasta do app',
+      click: () => {
+        void shell.openPath(process.cwd());
+      }
     },
     { type: 'separator' },
     {
