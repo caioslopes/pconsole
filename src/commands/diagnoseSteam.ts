@@ -22,8 +22,9 @@ async function main(): Promise<void> {
 
   process.stdout.write(`\nJanelas Steam encontradas: ${snapshot.windows.length}\n\n`);
   for (const windowInfo of snapshot.windows) {
+    const marker = isBigPictureWindow(windowInfo) ? ' [BIG PICTURE]' : '';
     process.stdout.write(`- pid=${windowInfo.processId} process=${windowInfo.processName ?? '(desconhecido)'}\n`);
-    process.stdout.write(`  title: ${windowInfo.title || '(sem titulo)'}\n`);
+    process.stdout.write(`  title: ${windowInfo.title || '(sem titulo)'}${marker}\n`);
     process.stdout.write(`  className: ${windowInfo.className || '(sem classe)'}\n`);
     process.stdout.write(`  handle: ${windowInfo.handle}\n`);
   }
@@ -37,6 +38,14 @@ function formatNullable(value: boolean | null): string {
   }
 
   return value ? 'true' : 'false';
+}
+
+function isBigPictureWindow(windowInfo: { processName: string | null; className: string; title: string }): boolean {
+  return (
+    windowInfo.processName?.toLowerCase() === 'steamwebhelper' &&
+    windowInfo.className === 'SDL_app' &&
+    windowInfo.title.toLowerCase().includes('big picture')
+  );
 }
 
 main().catch((error: unknown) => {

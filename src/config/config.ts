@@ -8,6 +8,7 @@ export interface AppConfig {
   inactivityTimeoutMs: number;
   autoActivationEnabled: boolean;
   deactivateAction: 'none' | 'turn-off-tv';
+  exitWhenBigPictureCloses: boolean;
   exitWhenSteamCloses: boolean;
   steamExitGracePeriodMs: number;
   steamExitPollingIntervalMs: number;
@@ -51,6 +52,7 @@ const defaultConfig: PConsoleConfig = {
     inactivityTimeoutMs: 15 * 60 * 1000,
     autoActivationEnabled: false,
     deactivateAction: 'none',
+    exitWhenBigPictureCloses: true,
     exitWhenSteamCloses: true,
     steamExitGracePeriodMs: 15000,
     steamExitPollingIntervalMs: 5000

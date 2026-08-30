@@ -5,6 +5,7 @@
     "inactivityTimeoutMs": 900000,
     "autoActivationEnabled": false,
     "deactivateAction": "none",
+    "exitWhenBigPictureCloses": true,
     "exitWhenSteamCloses": true,
     "steamExitGracePeriodMs": 15000,
     "steamExitPollingIntervalMs": 5000

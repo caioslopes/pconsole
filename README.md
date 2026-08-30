@@ -133,7 +133,13 @@ Para permitir desligamento automatico da TV no futuro, use:
 ```
 
 Por padrao, se a Steam for fechada enquanto o modo console estiver ativo, o app
-volta para `idle`:
+volta para `idle`. O fechamento do Big Picture tambem e observado por padrao:
+
+```json
+"exitWhenBigPictureCloses": true
+```
+
+Fallback para quando a Steam inteira fecha:
 
 ```json
 "exitWhenSteamCloses": true

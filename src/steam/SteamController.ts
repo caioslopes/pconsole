@@ -2,6 +2,7 @@ import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { SteamConfig } from '../config/config';
 import { Logger } from '../system/Logger';
+import { isSteamBigPictureOpen } from './SteamDiagnostics';
 
 const execFileAsync = promisify(execFile);
 
@@ -44,6 +45,10 @@ export class SteamController {
     } catch {
       return false;
     }
+  }
+
+  async isBigPictureOpen(): Promise<boolean> {
+    return isSteamBigPictureOpen();
   }
 
   private async openBigPictureUri(): Promise<void> {

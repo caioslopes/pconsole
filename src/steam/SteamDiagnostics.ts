@@ -54,6 +54,19 @@ export async function getSteamDiagnosticsSnapshot(): Promise<SteamDiagnosticsSna
   };
 }
 
+export async function isSteamBigPictureOpen(): Promise<boolean> {
+  const snapshot = await getSteamDiagnosticsSnapshot();
+  return snapshot.windows.some(isBigPictureWindow);
+}
+
+function isBigPictureWindow(windowInfo: SteamWindowInfo): boolean {
+  return (
+    windowInfo.processName?.toLowerCase() === 'steamwebhelper' &&
+    windowInfo.className === 'SDL_app' &&
+    windowInfo.title.toLowerCase().includes('big picture')
+  );
+}
+
 const windowsDiagnosticsScript = `
 Add-Type @"
 using System;

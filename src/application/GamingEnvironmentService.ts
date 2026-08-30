@@ -117,16 +117,31 @@ export class GamingEnvironmentService {
     }
 
     this.steamExitTimer = setInterval(() => {
-      void this.checkSteamExit();
+      void this.checkGamingModeExit();
     }, this.config.steamExitPollingIntervalMs);
   }
 
-  private async checkSteamExit(): Promise<void> {
+  private async checkGamingModeExit(): Promise<void> {
     if (this.stateMachine.state !== 'active') {
       return;
     }
 
     if (this.isWithinSteamExitGracePeriod()) {
+      return;
+    }
+
+    if (this.config.exitWhenBigPictureCloses) {
+      const isBigPictureOpen = await this.steam.isBigPictureOpen();
+      if (isBigPictureOpen) {
+        return;
+      }
+
+      this.logger.info('Steam Big Picture fechada; saindo do modo console.');
+      await this.deactivate('big-picture-closed');
+      return;
+    }
+
+    if (!this.config.exitWhenSteamCloses) {
       return;
     }
 
