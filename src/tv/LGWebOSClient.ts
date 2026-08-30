@@ -25,6 +25,14 @@ interface LGWebOSMessage {
   error?: string;
 }
 
+interface PendingRequest {
+  resolve: (message: LGWebOSMessage) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+  isFinalResponse: (message: LGWebOSMessage) => boolean;
+  onInterimResponse?: (message: LGWebOSMessage) => void;
+}
+
 interface RegisterResponsePayload {
   'client-key'?: string;
   clientKey?: string;
@@ -75,14 +83,7 @@ export class LGWebOSClient {
   private readonly requestTimeoutMs: number;
   private socket: WebSocket | null = null;
   private sequence = 0;
-  private pendingRequests = new Map<
-    string,
-    {
-      resolve: (message: LGWebOSMessage) => void;
-      reject: (error: Error) => void;
-      timeout: NodeJS.Timeout;
-    }
-  >();
+  private pendingRequests = new Map<string, PendingRequest>();
 
   constructor(
     private readonly options: LGWebOSClientOptions,
@@ -195,7 +196,13 @@ export class LGWebOSClient {
       payload['client-key'] = this.options.clientKey;
     }
 
-    const response = await this.sendRaw('register', payload);
+    const response = await this.sendRaw('register', payload, undefined, {
+      isFinalResponse: isRegisterFinalResponse,
+      onInterimResponse: (message) => {
+        this.logger.info('TV recebeu pedido de pareamento; aguardando autorizacao no controle remoto.', message.payload);
+      },
+      timeoutMs: 60000
+    });
     const responsePayload = response.payload as RegisterResponsePayload | undefined;
     const clientKey = responsePayload?.['client-key'] ?? responsePayload?.clientKey ?? null;
 
@@ -268,7 +275,16 @@ export class LGWebOSClient {
     await this.request('ssap://system/turnOff');
   }
 
-  private sendRaw(type: string, payload?: unknown, uri?: string): Promise<LGWebOSMessage> {
+  private sendRaw(
+    type: string,
+    payload?: unknown,
+    uri?: string,
+    options?: {
+      isFinalResponse?: (message: LGWebOSMessage) => boolean;
+      onInterimResponse?: (message: LGWebOSMessage) => void;
+      timeoutMs?: number;
+    }
+  ): Promise<LGWebOSMessage> {
     const socket = this.socket;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error('Cliente webOS nao conectado.'));
@@ -286,9 +302,15 @@ export class LGWebOSClient {
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
         reject(new Error(`Timeout aguardando resposta webOS para ${uri ?? type}.`));
-      }, this.requestTimeoutMs);
+      }, options?.timeoutMs ?? this.requestTimeoutMs);
 
-      this.pendingRequests.set(id, { resolve, reject, timeout });
+      this.pendingRequests.set(id, {
+        resolve,
+        reject,
+        timeout,
+        isFinalResponse: options?.isFinalResponse ?? (() => true),
+        onInterimResponse: options?.onInterimResponse
+      });
       socket.send(JSON.stringify(message), (error) => {
         if (!error) {
           return;
@@ -326,6 +348,11 @@ export class LGWebOSClient {
       return;
     }
 
+    if (!request.isFinalResponse(message)) {
+      request.onInterimResponse?.(message);
+      return;
+    }
+
     clearTimeout(request.timeout);
     this.pendingRequests.delete(message.id);
     request.resolve(message);
@@ -358,4 +385,9 @@ function formatError(error: unknown): string {
   }
 
   return String(error);
+}
+
+function isRegisterFinalResponse(message: LGWebOSMessage): boolean {
+  const payload = message.payload as RegisterResponsePayload | undefined;
+  return message.type === 'registered' || Boolean(payload?.['client-key'] ?? payload?.clientKey);
 }
