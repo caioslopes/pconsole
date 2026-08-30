@@ -36,6 +36,19 @@ Diagnosticar processos e janelas da Steam:
 npm run steam:diagnose
 ```
 
+Instalar inicializacao automatica no login do Windows:
+
+```bash
+npm run startup:install
+```
+
+Consultar ou remover a inicializacao automatica:
+
+```bash
+npm run startup:status
+npm run startup:uninstall
+```
+
 ## Estado atual
 
 Esta primeira versao entrega a fundacao:
@@ -155,3 +168,21 @@ Steam foi fechada:
 Para investigar uma saida especifica do Big Picture, rode `npm run
 steam:diagnose` com a Steam fechada, com a Steam normal aberta, com Big Picture
 aberto e depois de sair do Big Picture.
+
+## Startup no Windows
+
+O pconsole deve iniciar com a sessao do usuario, nao como servico do Windows,
+porque precisa acessar controle HID, Steam e janelas da sessao grafica.
+
+O comando `npm run startup:install` gera o build e cria `pconsole.cmd` na pasta
+de Inicializar do usuario. Na proxima entrada no Windows, ele roda:
+
+```bash
+node dist/main.js
+```
+
+Os logs do startup ficam em:
+
+```text
+logs/pconsole-startup.log
+```
