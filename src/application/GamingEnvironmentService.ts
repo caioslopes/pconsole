@@ -48,6 +48,10 @@ export class GamingEnvironmentService {
     await this.activityMonitor.stop();
   }
 
+  getState(): string {
+    return this.stateMachine.state;
+  }
+
   async activateConsoleMode(): Promise<void> {
     if (this.stateMachine.state === 'active') {
       this.logger.info('Modo console ja esta ativo.');

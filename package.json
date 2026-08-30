@@ -11,6 +11,7 @@
     "controller:diagnose": "tsx src/commands/diagnoseControllers.ts",
     "controller:list": "tsx src/commands/listControllers.ts",
     "dev": "tsx src/main.ts",
+    "dev:tray": "npm run build && electron dist/tray/trayApp.js",
     "steam:diagnose": "tsx src/commands/diagnoseSteam.ts",
     "startup:install": "tsx src/commands/installStartup.ts",
     "startup:status": "tsx src/commands/statusStartup.ts",
@@ -21,12 +22,14 @@
     "tv:pair": "tsx src/commands/pairTv.ts",
     "tv:wake": "tsx src/commands/wakeTv.ts",
     "build": "tsc -p tsconfig.json",
+    "tray": "electron dist/tray/trayApp.js",
     "start": "node dist/main.js",
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
     "@types/ws": "^8.18.1",
+    "electron": "^41.7.1",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   },

@@ -96,7 +96,7 @@ function createStartupCommand(projectDirectory: string): string {
     '@echo off',
     `cd /d "${projectDirectory}"`,
     `if not exist "${logDirectory}" mkdir "${logDirectory}"`,
-    `node dist\\main.js >> "${logFile}" 2>&1`
+    `npm run tray >> "${logFile}" 2>&1`
   ].join('\r\n');
 }
 

@@ -36,6 +36,12 @@ Diagnosticar processos e janelas da Steam:
 npm run steam:diagnose
 ```
 
+Rodar com icone na bandeja do Windows:
+
+```bash
+npm run dev:tray
+```
+
 Instalar inicializacao automatica no login do Windows:
 
 ```bash
@@ -175,10 +181,11 @@ O pconsole deve iniciar com a sessao do usuario, nao como servico do Windows,
 porque precisa acessar controle HID, Steam e janelas da sessao grafica.
 
 O comando `npm run startup:install` gera o build e cria `pconsole.cmd` na pasta
-de Inicializar do usuario. Na proxima entrada no Windows, ele roda:
+de Inicializar do usuario. Na proxima entrada no Windows, ele roda o app de
+bandeja:
 
 ```bash
-node dist/main.js
+npm run tray
 ```
 
 Os logs do startup ficam em:
