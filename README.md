@@ -85,11 +85,18 @@ Por seguranca, a ativacao automatica vem desligada por padrao:
 "autoActivationEnabled": false
 ```
 
-Quando estiver pronto para testar atividade de mouse/teclado no Windows, altere
+Quando estiver pronto para testar atividade do controle no Windows, altere
 para `true` no `config.json` e rode:
 
 ```bash
 npm run dev
+```
+
+A ativacao automatica observa o controle configurado, nao mouse/teclado. Para
+conferir se o DualSense foi encontrado:
+
+```bash
+npm run controller:list
 ```
 
 Por padrao, o timeout de inatividade nao desliga a TV:

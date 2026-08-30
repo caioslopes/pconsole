@@ -6,6 +6,13 @@
     "autoActivationEnabled": false,
     "deactivateAction": "none"
   },
+  "controller": {
+    "enabled": true,
+    "vendorId": 1356,
+    "productIds": [3302, 3570],
+    "scanIntervalMs": 3000,
+    "warmupMs": 1000
+  },
   "steam": {
     "executablePath": "C:\\Program Files (x86)\\Steam\\steam.exe",
     "launchArgs": ["-gamepadui"]

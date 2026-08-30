@@ -3,7 +3,7 @@ import { loadConfig } from './config/config';
 import { ConsoleLogger } from './system/Logger';
 import { SteamController } from './steam/SteamController';
 import { createTVController } from './tv/createTVController';
-import { WindowsInputMonitor } from './activity/WindowsInputMonitor';
+import { DualSenseControllerMonitor } from './activity/DualSenseControllerMonitor';
 
 async function main(): Promise<void> {
   const logger = new ConsoleLogger();
@@ -11,7 +11,7 @@ async function main(): Promise<void> {
 
   const tv = createTVController(config.tv, logger);
   const steam = new SteamController(config.steam, logger);
-  const activityMonitor = new WindowsInputMonitor(config.app, logger);
+  const activityMonitor = new DualSenseControllerMonitor(config.app, config.controller, logger);
 
   const service = new GamingEnvironmentService({
     activityMonitor,

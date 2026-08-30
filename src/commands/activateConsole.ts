@@ -1,5 +1,5 @@
 import { GamingEnvironmentService } from '../application/GamingEnvironmentService';
-import { WindowsInputMonitor } from '../activity/WindowsInputMonitor';
+import { DualSenseControllerMonitor } from '../activity/DualSenseControllerMonitor';
 import { loadConfig } from '../config/config';
 import { SteamController } from '../steam/SteamController';
 import { ConsoleLogger } from '../system/Logger';
@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const config = await loadConfig(logger);
 
   const service = new GamingEnvironmentService({
-    activityMonitor: new WindowsInputMonitor(config.app, logger),
+    activityMonitor: new DualSenseControllerMonitor(config.app, config.controller, logger),
     config: config.app,
     logger,
     steam: new SteamController(config.steam, logger),

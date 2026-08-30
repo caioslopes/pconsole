@@ -10,6 +10,14 @@ export interface AppConfig {
   deactivateAction: 'none' | 'turn-off-tv';
 }
 
+export interface ControllerConfig {
+  enabled: boolean;
+  vendorId: number;
+  productIds: number[];
+  scanIntervalMs: number;
+  warmupMs: number;
+}
+
 export interface SteamConfig {
   executablePath: string | null;
   launchArgs: string[];
@@ -28,6 +36,7 @@ export interface TVConfig {
 
 export interface PConsoleConfig {
   app: AppConfig;
+  controller: ControllerConfig;
   steam: SteamConfig;
   tv: TVConfig;
 }
@@ -39,6 +48,13 @@ const defaultConfig: PConsoleConfig = {
     inactivityTimeoutMs: 15 * 60 * 1000,
     autoActivationEnabled: false,
     deactivateAction: 'none'
+  },
+  controller: {
+    enabled: true,
+    vendorId: 0x054c,
+    productIds: [0x0ce6, 0x0df2],
+    scanIntervalMs: 3000,
+    warmupMs: 1000
   },
   steam: {
     executablePath: defaultSteamPath(),
@@ -78,6 +94,10 @@ function mergeConfig(base: PConsoleConfig, override: Partial<PConsoleConfig>): P
     app: {
       ...base.app,
       ...override.app
+    },
+    controller: {
+      ...base.controller,
+      ...override.controller
     },
     steam: {
       ...base.steam,
