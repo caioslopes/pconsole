@@ -1,4 +1,5 @@
 import { app, Menu, nativeImage, Tray } from 'electron';
+import path from 'node:path';
 import { createGamingEnvironmentService } from '../application/createGamingEnvironmentService';
 import { loadConfig } from '../config/config';
 import { ConsoleLogger } from '../system/Logger';
@@ -78,17 +79,14 @@ async function shutdown(): Promise<void> {
 }
 
 function createTrayIcon(): Electron.NativeImage {
-  const svg = [
-    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">',
-    '<rect width="32" height="32" rx="7" fill="#101820"/>',
-    '<path d="M8 18c0-4 3-7 7-7h2c4 0 7 3 7 7v2c0 2-1 4-3 4-1 0-2-1-3-2l-1-2h-2l-1 2c-1 1-2 2-3 2-2 0-3-2-3-4v-2z" fill="#f4f7fb"/>',
-    '<path d="M11 17h5M13.5 14.5v5" stroke="#101820" stroke-width="1.8" stroke-linecap="round"/>',
-    '<circle cx="20" cy="16" r="1.2" fill="#101820"/>',
-    '<circle cx="22.5" cy="19" r="1.2" fill="#101820"/>',
-    '</svg>'
-  ].join('');
+  const iconPath = path.resolve(__dirname, '../../pconsole.png');
+  const icon = nativeImage.createFromPath(iconPath);
 
-  return nativeImage.createFromDataURL(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+  if (icon.isEmpty()) {
+    throw new Error(`Nao foi possivel carregar o icone do tray: ${iconPath}`);
+  }
+
+  return icon;
 }
 
 app.setName('pconsole');
